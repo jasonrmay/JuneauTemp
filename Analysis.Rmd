@@ -5,12 +5,116 @@ output: html_document
 
 ```{r}
   # load necessary libraries
-  library(dplyr)
+  library(stringr)
+
+  # The url for the NOAA Juneau airport weather data CSV file
+  csv_url <- "https://www.ncei.noaa.gov/access/past-weather/USW00025309/data.csv"
+  
+  # import the Juneau dataset
+  Juneau <- read.csv(csv_url, skip = 1)
+  head(Juneau)
+
   # subset data to just 2023 by filtering the data column to strings with just "2023" as the first four characters
-  # make Date column string type if it is not already
-  Juneau$Date <- as.character(Juneau$Date)
-  data_2023 <- Juneau[substr(Juneau$Date, 1, 4) == 2023, ]
-  # display the first few rows of the 2023 data
+  data_2023 <- Juneau[substr(Juneau$Date, 1, 4) == "2023", ]
   head(data_2023)
+  
+  hist(data_2023$TAVG..Degrees.Fahrenheit., 
+       main = "Histogram of Average Temperatures in Juneau (2023)", 
+       xlab = "Average Temperature (°F)", 
+       ylab = "Frequency", 
+       col = "blue", 
+       border = "black")
 ```
 
+```{r}
+# investigate the relationship between TAVG and Percipitation,Snow, and SnowDepth
+  Tavg <- data_2023$TAVG..Degrees.Fahrenheit.
+  percipitation <- data_2023$PRCP..Inches.
+  Snow <- data_2023$SNOW..Inches.
+  SnowDepth <- data_2023$SNWD..Inches.
+  
+  plot(percipitation, Tavg, 
+       main = "Average Temperature vs. Precipitation (2023)", 
+       xlab = "Precipitation (inches)", 
+       ylab = "Average Temperature (°F)", 
+       col = "red", 
+       pch = 19)
+  plot(Snow, Tavg,
+       main = "Average Temperature vs. Snow (2023)", 
+       xlab = "Precipitation (inches)", 
+       ylab = "Average Temperature (°F)", 
+       col = "red", 
+       pch = 19)
+  plot(SnowDepth, Tavg,
+       main = "Average Temperature vs. Snow Depth (2023)",
+       xlab = "Snow Depth (inches)",
+       ylab = "Average Temperature (°F)",
+       col = "red",
+       pch = 19)
+```
+```{r}
+  # bin the TAVG by 10 degree increments
+  bins <- cut(Tavg, breaks = seq(floor(min(Tavg, na.rm = TRUE)/10)*10, ceiling(max(Tavg, na.rm = TRUE)/10)*10, by = 10), include.lowest = TRUE)
+  binned_data <- data.frame(Tavg = Tavg, Percipitation = percipitation, Snow = Snow, SnowDepth = SnowDepth, Bin = bins)
+  
+  # remove rows with zero percip, snow, or snowdepth to avoid skewing the analysis.
+  binned_data <- binned_data[binned_data$Percipitation > 0 & binned_data$Snow > 0 & binned_data$SnowDepth > 0, ]
+  
+  # plot new tavg vs percipitation, snow, and snowdepth
+  plot(binned_data$Percipitation, binned_data$Tavg,
+       main = "Binned Average Temperature vs. Precipitation (2023)", 
+       xlab = "Precipitation (inches)", 
+       ylab = "Average Temperature (°F)", 
+       col = "green", 
+       pch = 19)
+  plot(binned_data$Snow, binned_data$Tavg,
+       main = "Binned Average Temperature vs. Snow (2023)",
+       xlab = "Snow (inches)",
+       ylab = "Average Temperature (°F)",
+       col = "green",
+       pch = 19)
+  plot(binned_data$SnowDepth, binned_data$Tavg,
+       main = "Binned Average Temperature vs. Snow Depth (2023)",
+       xlab = "Snow Depth (inches)",
+       ylab = "Average Temperature (°F)",
+       col = "green",
+       pch = 19)
+
+  mod <- lm(Percipitation ~ Bin, data = binned_data)
+  # residuals plot
+  plot(mod$residuals, 
+       main = "Residuals of Percipitation Model", 
+       ylab = "Residuals", 
+       xlab = "Index", 
+       col = "purple", 
+       pch = 19)
+  summary(mod)
+  
+  mod2 <- lm(Snow ~ Bin, data = binned_data)
+  # residuals plot
+  plot(mod2$residuals, 
+       main = "Residuals of Percipitation Model", 
+       ylab = "Residuals", 
+       xlab = "Index", 
+       col = "purple", 
+       pch = 19)
+  summary(mod2)
+  
+  mod3 <- lm(SnowDepth ~ Bin, data = binned_data)
+  # residuals plot
+  plot(mod3$residuals, 
+       main = "Residuals of Percipitation Model", 
+       ylab = "Residuals", 
+       xlab = "Index", 
+       col = "purple", 
+       pch = 19)
+  summary(mod3)
+
+```
+  
+  
+  
+  
+  
+  
+  
