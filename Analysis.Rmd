@@ -1,0 +1,16 @@
+---
+title: "Analysis"
+output: html_document
+---
+
+```{r}
+  # load necessary libraries
+  library(dplyr)
+  # subset data to just 2023 by filtering the data column to strings with just "2023" as the first four characters
+  # make Date column string type if it is not already
+  Juneau$Date <- as.character(Juneau$Date)
+  data_2023 <- Juneau[substr(Juneau$Date, 1, 4) == 2023, ]
+  # display the first few rows of the 2023 data
+  head(data_2023)
+```
+
