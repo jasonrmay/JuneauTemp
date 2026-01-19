@@ -24,6 +24,94 @@ output: html_document
        ylab = "Frequency", 
        col = "blue", 
        border = "black")
+  
+  # histogram of average temp by month in 2023
+  data_2023$Month <- as.numeric(substr(data_2023$Date, 6, 7))
+  par(mfrow = c(3, 4)) # set up a 3
+  for (month in 1:12) {
+    hist(data_2023$TAVG..Degrees.Fahrenheit.[data_2023$Month == month], 
+         main = paste("Histogram of Avg Temp - Month", month, "(2023)"), 
+         xlab = "Average Temperature (°F)", 
+         ylab = "Frequency", 
+         col = "lightblue", 
+         border = "black")
+  }
+  
+  # Investigation of average temp by seasons for 2023
+  season_data <- data_2023
+  fall_months <- c(9, 10, 11)
+  winter_months <- c(12, 1, 2)
+  spring_months <- c(3, 4, 5)
+  summer_months <- c(6, 7, 8)
+  par(mfrow = c(1, 2)) # set up a 1x2 layout
+  # fall
+  hist(season_data$TAVG..Degrees.Fahrenheit.[data_2023$Month %in% fall_months], 
+       main = "Histogram of Avg Temp - Fall Months, 2023",
+       xlab = "Average Temperature (°F)",
+       ylab = "Frequency",
+       col = "brown",
+       border = "black")
+  sd(season_data$TAVG..Degrees.Fahrenheit.[data_2023$Month %in% fall_months], na.rm = TRUE)
+  # winter
+  hist(season_data$TAVG..Degrees.Fahrenheit.[data_2023$Month %in% winter_months], 
+       main = "Histogram of Avg Temp - Winter Months, 2023",
+       xlab = "Average Temperature (°F)",
+       ylab = "Frequency",
+         col = "lightgray",
+       border = "black")
+  sd(season_data$TAVG..Degrees.Fahrenheit.[data_2023$Month %in% winter_months], na.rm = TRUE)
+  # spring
+  hist(season_data$TAVG..Degrees.Fahrenheit.[data_2023$Month %in% spring_months],
+       main = "Histogram of Avg Temp - Spring Months, 2023",
+       xlab = "Average Temperature (°F)",
+       ylab = "Frequency",
+       col = "lightgreen",
+       border = "black")
+  sd(season_data$TAVG..Degrees.Fahrenheit.[data_2023$Month %in% spring_months], na.rm = TRUE)
+  # summer
+  hist(season_data$TAVG..Degrees.Fahrenheit.[data_2023$Month %in% summer_months], 
+       main = "Histogram of Avg Temp - Summer Months, 2023",
+       xlab = "Average Temperature (°F)",
+       ylab = "Frequency",
+       col = "orange",
+       border = "black")
+  sd(season_data$TAVG..Degrees.Fahrenheit.[data_2023$Month %in% summer_months], na.rm = TRUE)
+  
+  # run a levene test between seasons to see if variances are equal
+  library(car)
+  season_data$Season <- NA
+  season_data$Season[season_data$Month %in% fall_months] <- "Fall"
+  season_data$Season[season_data$Month %in% winter_months] <- "Winter"
+  season_data$Season[season_data$Month %in% spring_months] <- "Spring"
+  season_data$Season[season_data$Month %in% summer_months] <- "Summer"
+  
+  # Levene's Test between Fall and sping
+  leveneTest(TAVG..Degrees.Fahrenheit. ~ Season, data = season_data[ season_data$Season %in% c("Fall", "Spring"), ])
+  # Levene's Test between Winter and Summer
+  leveneTest(TAVG..Degrees.Fahrenheit. ~ Season, data = season_data[ season_data$Season %in% c("Winter", "Summer"), ])
+  # Levene's Test between Fall and Winter
+  leveneTest(TAVG..Degrees.Fahrenheit. ~ Season, data = season_data[ season_data$Season %in% c("Fall", "Winter"), ])
+  # spirng and summer 
+  leveneTest(TAVG..Degrees.Fahrenheit. ~ Season, data = season_data[ season_data$Season %in% c("Spring", "Summer"), ])
+  # summer and fall
+  leveneTest(TAVG..Degrees.Fahrenheit. ~ Season, data = season_data[ season_data$Season %in% c("Summer", "Fall"), ])
+  
+  
+  
+  # histogram of average temp by year for years 2010 to 2023
+  Juneau$Year <- as.numeric(substr(Juneau$Date, 1, 4))
+  par(mfrow = c(6, 4)) # set up a 6
+  for (year in 2014:2023) {
+    # graph and make sure the x axis is consistent across all histograms
+    hist(Juneau$TAVG..Degrees.Fahrenheit.[Juneau$Year == year], 
+         main = paste("Histogram of Avg Temp - Year", year), 
+         xlab = "Average Temperature (°F)", 
+         ylab = "Frequency", 
+         col = "lightgreen", 
+         border = "black", 
+         xlim = c(min(Juneau$TAVG..Degrees.Fahrenheit., na.rm = TRUE), max(Juneau$TAVG..Degrees.Fahrenheit., na.rm = TRUE)))
+  }
+  
 ```
 
 ```{r}
