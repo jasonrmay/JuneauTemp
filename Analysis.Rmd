@@ -2,11 +2,13 @@
 title: "Analysis"
 output: html_document
 ---
+```{r}
+# load necessary libraries
+  library(stringr)
+  library(car)
+```
 
 ```{r}
-  # load necessary libraries
-  library(stringr)
-
   # The url for the NOAA Juneau airport weather data CSV file
   csv_url <- "https://www.ncei.noaa.gov/access/past-weather/USW00025309/data.csv"
   
@@ -17,7 +19,10 @@ output: html_document
   # subset data to just 2023 by filtering the data column to strings with just "2023" as the first four characters
   data_2023 <- Juneau[substr(Juneau$Date, 1, 4) == "2023", ]
   head(data_2023)
+```
   
+```{r}
+  # histogram of average temp in 2023
   hist(data_2023$TAVG..Degrees.Fahrenheit., 
        main = "Histogram of Average Temperatures in Juneau (2023)", 
        xlab = "Average Temperature (°F)", 
@@ -36,68 +41,73 @@ output: html_document
          col = "lightblue", 
          border = "black")
   }
-  
+```
+
+```{r}
   # Investigation of average temp by seasons for 2023
   season_data <- data_2023
+  
   fall_months <- c(9, 10, 11)
   winter_months <- c(12, 1, 2)
   spring_months <- c(3, 4, 5)
   summer_months <- c(6, 7, 8)
-  par(mfrow = c(1, 2)) # set up a 1x2 layout
-  # fall
-  hist(season_data$TAVG..Degrees.Fahrenheit.[data_2023$Month %in% fall_months], 
-       main = "Histogram of Avg Temp - Fall Months, 2023",
-       xlab = "Average Temperature (°F)",
-       ylab = "Frequency",
-       col = "brown",
-       border = "black")
-  sd(season_data$TAVG..Degrees.Fahrenheit.[data_2023$Month %in% fall_months], na.rm = TRUE)
-  # winter
-  hist(season_data$TAVG..Degrees.Fahrenheit.[data_2023$Month %in% winter_months], 
-       main = "Histogram of Avg Temp - Winter Months, 2023",
-       xlab = "Average Temperature (°F)",
-       ylab = "Frequency",
-         col = "lightgray",
-       border = "black")
-  sd(season_data$TAVG..Degrees.Fahrenheit.[data_2023$Month %in% winter_months], na.rm = TRUE)
-  # spring
-  hist(season_data$TAVG..Degrees.Fahrenheit.[data_2023$Month %in% spring_months],
-       main = "Histogram of Avg Temp - Spring Months, 2023",
-       xlab = "Average Temperature (°F)",
-       ylab = "Frequency",
-       col = "lightgreen",
-       border = "black")
-  sd(season_data$TAVG..Degrees.Fahrenheit.[data_2023$Month %in% spring_months], na.rm = TRUE)
-  # summer
-  hist(season_data$TAVG..Degrees.Fahrenheit.[data_2023$Month %in% summer_months], 
-       main = "Histogram of Avg Temp - Summer Months, 2023",
-       xlab = "Average Temperature (°F)",
-       ylab = "Frequency",
-       col = "orange",
-       border = "black")
-  sd(season_data$TAVG..Degrees.Fahrenheit.[data_2023$Month %in% summer_months], na.rm = TRUE)
   
-  # run a levene test between seasons to see if variances are equal
-  library(car)
-  season_data$Season <- NA
-  season_data$Season[season_data$Month %in% fall_months] <- "Fall"
-  season_data$Season[season_data$Month %in% winter_months] <- "Winter"
-  season_data$Season[season_data$Month %in% spring_months] <- "Spring"
-  season_data$Season[season_data$Month %in% summer_months] <- "Summer"
+  fall_avg <- season_data$TAVG..Degrees.Fahrenheit.[season_data$Month %in% fall_months]
+  winter_avg <- season_data$TAVG..Degrees.Fahrenheit.[season_data$Month %in% winter_months]
+  spring_avg <- season_data$TAVG..Degrees.Fahrenheit.[season_data$Month %in% spring_months]
+  summer_avg <- season_data$TAVG..Degrees.Fahrenheit.[season_data$Month %in% summer_months]
   
-  # Levene's Test between Fall and sping
-  leveneTest(TAVG..Degrees.Fahrenheit. ~ Season, data = season_data[ season_data$Season %in% c("Fall", "Spring"), ])
-  # Levene's Test between Winter and Summer
-  leveneTest(TAVG..Degrees.Fahrenheit. ~ Season, data = season_data[ season_data$Season %in% c("Winter", "Summer"), ])
-  # Levene's Test between Fall and Winter
-  leveneTest(TAVG..Degrees.Fahrenheit. ~ Season, data = season_data[ season_data$Season %in% c("Fall", "Winter"), ])
-  # spirng and summer 
-  leveneTest(TAVG..Degrees.Fahrenheit. ~ Season, data = season_data[ season_data$Season %in% c("Spring", "Summer"), ])
-  # summer and fall
-  leveneTest(TAVG..Degrees.Fahrenheit. ~ Season, data = season_data[ season_data$Season %in% c("Summer", "Fall"), ])
+  seasonal_averages <- list(Fall = fall_avg, Winter = winter_avg, Spring = spring_avg, Summer = summer_avg)
+  
+  # plot a histogram of each seasons average temps. Include the standard deviation of the average temps for that season in a legend.
+  par(mfrow = c(2, 2)) # set up a 2x2 plot layout
+  for (season in names(seasonal_averages)) {
+    avg_temps <- seasonal_averages[[season]]
+    hist(avg_temps, 
+         main = paste("Histogram of Avg Temp -", season, "(2023)"), 
+         xlab = "Average Temperature (°F)", 
+         ylab = "Frequency", 
+         col = "lightcoral", 
+         border = "black")
+    sd_temp <- sd(avg_temps, na.rm = TRUE)
+    legend("topright", legend = paste("SD:", round(sd_temp, 2)), bty = "n")
+  }
+```
+```{r}
+  # using a levene's test to see if there is a significant difference in variance between the seasons.
+  # randomly sample 45 data points from each season to ensure equal sample sizes
+
+  set.seed(42) # for reproducibility
+  sample_size <- 45
+
+  fall_sample <- sample(fall_avg, sample_size, replace = TRUE)
+  winter_sample <- sample(winter_avg, sample_size, replace = TRUE)
+  spring_sample <- sample(spring_avg, sample_size, replace = TRUE)
+  summer_sample <- sample(summer_avg, sample_size, replace = TRUE)
+  seasonal_samples <- data.frame(
+    Temp = c(fall_sample, winter_sample, spring_sample, summer_sample),
+    Season = factor(rep(c("Fall", "Winter", "Spring", "Summer"), each = sample_size))
+  )
+  
+  # run the levene's test pairwise between the seasons
+  levene_fall_winter <- leveneTest(Temp ~ Season, data = seasonal_samples[seasonal_samples$Season %in% c("Fall", "Winter"), ])
+  print(levene_fall_winter)
+  levene_winter_spring <- leveneTest(Temp ~ Season, data = seasonal_samples[seasonal_samples$Season %in% c("Winter", "Spring"), ])
+  print(levene_winter_spring)
+  levene_fall_summer <- leveneTest(Temp ~ Season, data = seasonal_samples[seasonal_samples$Season %in% c("Fall", "Summer"), ])
+  print(levene_fall_summer)
+  levene_spring_summer <- leveneTest(Temp ~ Season, data = seasonal_samples[seasonal_samples$Season %in% c("Spring", "Summer"), ])
+  print(levene_spring_summer)
   
   
+  levene_fall_spring <- leveneTest(Temp ~ Season, data = seasonal_samples[seasonal_samples$Season %in% c("Fall", "Spring"), ])
+  print(levene_fall_spring)
+  levene_winter_summer <- leveneTest(Temp ~ Season, data = seasonal_samples[seasonal_samples$Season %in% c("Winter", "Summer"), ])
+  print(levene_winter_summer)
   
+```
+
+```{r}
   # histogram of average temp by year for years 2010 to 2023
   Juneau$Year <- as.numeric(substr(Juneau$Date, 1, 4))
   par(mfrow = c(6, 4)) # set up a 6
@@ -111,8 +121,8 @@ output: html_document
          border = "black", 
          xlim = c(min(Juneau$TAVG..Degrees.Fahrenheit., na.rm = TRUE), max(Juneau$TAVG..Degrees.Fahrenheit., na.rm = TRUE)))
   }
-  
 ```
+
 
 ```{r}
 # investigate the relationship between TAVG and Percipitation,Snow, and SnowDepth
