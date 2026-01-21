@@ -6,6 +6,7 @@ output: html_document
 # load necessary libraries
   library(stringr)
   library(car)
+  library(ggplot2)
 ```
 
 ```{r}
@@ -69,8 +70,8 @@ output: html_document
          ylab = "Frequency", 
          col = "lightcoral", 
          border = "black")
-    sd_temp <- sd(avg_temps, na.rm = TRUE)
-    legend("topright", legend = paste("SD:", round(sd_temp, 2)), bty = "n")
+    var_temp <- var(avg_temps, na.rm = TRUE)
+    legend("topright", legend = paste("Var:", round(var_temp, 2)), bty = "n")
   }
 ```
 ```{r}
@@ -78,7 +79,7 @@ output: html_document
   # randomly sample 45 data points from each season to ensure equal sample sizes
 
   set.seed(42) # for reproducibility
-  sample_size <- 45
+  sample_size <- 60
 
   fall_sample <- sample(fall_avg, sample_size, replace = TRUE)
   winter_sample <- sample(winter_avg, sample_size, replace = TRUE)
@@ -88,6 +89,10 @@ output: html_document
     Temp = c(fall_sample, winter_sample, spring_sample, summer_sample),
     Season = factor(rep(c("Fall", "Winter", "Spring", "Summer"), each = sample_size))
   )
+  
+  # bar plot of avg temps grouped by season
+  ggplot(seasonal_samples, aes(x=Season, y=Temp)) +
+  geom_boxplot()
   
   # run the levene's test pairwise between the seasons
   levene_fall_winter <- leveneTest(Temp ~ Season, data = seasonal_samples[seasonal_samples$Season %in% c("Fall", "Winter"), ])
