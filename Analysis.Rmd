@@ -7,6 +7,7 @@ output: html_document
   library(stringr)
   library(car)
   library(ggplot2)
+  library(tidyverse)
 ```
 
 ```{r}
@@ -123,7 +124,19 @@ output: html_document
 
 ```{r}
   # histogram of average temp by year for years in the 21st century
+  data_20_years$Year <- factor(substr(data_20_years$Date,1,4))
+
+  Juneau$Year <- factor(substr(Juneau$Date,1,4))
+
+  droped_data <- drop_na(Juneau)
+
+  temp <- droped_data$TAVG..Degrees.Fahrenheit.
   
+  droped_data |>
+    mutate(transf_temp = log(temp)) |>
+    ggplot(aes(x = transf_temp)) +
+    geom_histogram( ) +
+    facet_wrap(~Year)
 ```
 
 
