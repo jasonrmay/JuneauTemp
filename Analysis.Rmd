@@ -19,12 +19,20 @@ output: html_document
 
   # subset data to just 2023 by filtering the data column to strings with just "2023" as the first four characters
   data_2023 <- Juneau[substr(Juneau$Date, 1, 4) == "2023", ]
-  head(data_2023)
+  data_2023$Month <- as.numeric(substr(data_2023$Date, 6, 7))
+  data_2018 <- Juneau[substr(Juneau$Date, 1, 4) == "2018", ]
+  data_2018$Month <- as.numeric(substr(data_2018$Date, 6, 7))
+  
+  data_20_years <- Juneau[substr(Juneau$Date, 1, 2) == "20", ]
+  
+  data <- data_2018
+  data$Month <- as.numeric(substr(data$Date, 6, 7))
+  head(data)
 ```
   
 ```{r}
   # histogram of average temp in 2023
-  hist(data_2023$TAVG..Degrees.Fahrenheit., 
+  hist(data$TAVG..Degrees.Fahrenheit., 
        main = "Histogram of Average Temperatures in Juneau (2023)", 
        xlab = "Average Temperature (°F)", 
        ylab = "Frequency", 
@@ -32,10 +40,10 @@ output: html_document
        border = "black")
   
   # histogram of average temp by month in 2023
-  data_2023$Month <- as.numeric(substr(data_2023$Date, 6, 7))
+  data$Month <- as.numeric(substr(data$Date, 6, 7))
   par(mfrow = c(3, 4)) # set up a 3
   for (month in 1:12) {
-    hist(data_2023$TAVG..Degrees.Fahrenheit.[data_2023$Month == month], 
+    hist(data$TAVG..Degrees.Fahrenheit.[data$Month == month], 
          main = paste("Histogram of Avg Temp - Month", month, "(2023)"), 
          xlab = "Average Temperature (°F)", 
          ylab = "Frequency", 
@@ -46,12 +54,13 @@ output: html_document
 
 ```{r}
   # Investigation of average temp by seasons for 2023
-  season_data <- data_2023
+  season_data <- data
   
   fall_months <- c(9, 10, 11)
   winter_months <- c(12, 1, 2)
   spring_months <- c(3, 4, 5)
-  summer_months <- c(6, 7, 8)
+   summer_months <- c(6, 7, 8)
+  
   
   fall_avg <- season_data$TAVG..Degrees.Fahrenheit.[season_data$Month %in% fall_months]
   winter_avg <- season_data$TAVG..Degrees.Fahrenheit.[season_data$Month %in% winter_months]
@@ -113,19 +122,8 @@ output: html_document
 ```
 
 ```{r}
-  # histogram of average temp by year for years 2010 to 2023
-  Juneau$Year <- as.numeric(substr(Juneau$Date, 1, 4))
-  par(mfrow = c(6, 4)) # set up a 6
-  for (year in 2014:2023) {
-    # graph and make sure the x axis is consistent across all histograms
-    hist(Juneau$TAVG..Degrees.Fahrenheit.[Juneau$Year == year], 
-         main = paste("Histogram of Avg Temp - Year", year), 
-         xlab = "Average Temperature (°F)", 
-         ylab = "Frequency", 
-         col = "lightgreen", 
-         border = "black", 
-         xlim = c(min(Juneau$TAVG..Degrees.Fahrenheit., na.rm = TRUE), max(Juneau$TAVG..Degrees.Fahrenheit., na.rm = TRUE)))
-  }
+  # histogram of average temp by year for years in the 21st century
+  
 ```
 
 
