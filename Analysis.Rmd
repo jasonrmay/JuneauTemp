@@ -13,6 +13,8 @@ output: html_document
 ```{r}
   # The url for the NOAA Juneau airport weather data CSV file
   csv_url <- "https://www.ncei.noaa.gov/access/past-weather/USW00025309/data.csv"
+
+  ocean_url <- "https://erddap.aoos.org/erddap/tabledap/noaa_nos_co_ops_9452210.csv?time%2Cair_temperature%2Csea_water_temperature%2Csea_water_temperature_qc_agg%2Csea_water_temperature_qc_tests%2Cstation&time%3E=2026-02-02T13%3A00%3A00Z"
   
   # import the Juneau dataset
   Juneau <- read.csv(csv_url, skip = 1)
@@ -60,7 +62,7 @@ output: html_document
   fall_months <- c(9, 10, 11)
   winter_months <- c(12, 1, 2)
   spring_months <- c(3, 4, 5)
-   summer_months <- c(6, 7, 8)
+  summer_months <- c(6, 7, 8)
   
   
   fall_avg <- season_data$TAVG..Degrees.Fahrenheit.[season_data$Month %in% fall_months]
@@ -126,7 +128,17 @@ output: html_document
   # histogram of average temp by year for years in the 21st century
   data_20_years$Year <- factor(substr(data_20_years$Date,1,4))
 
+  # add year data
   Juneau$Year <- factor(substr(Juneau$Date,1,4))
+  
+  # add season data
+  Juneau$Month <- factor(substr(Juneau$Date,6,7))
+  
+  seasons <- list(fall <- fall_months,
+                 spring <- spring_months,
+                 winter <- winter_months,
+                 summer <- summer_months)
+  Juneau$Season <- 
 
   droped_data <- drop_na(Juneau)
 
